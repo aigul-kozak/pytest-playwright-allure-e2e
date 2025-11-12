@@ -10,6 +10,8 @@ from pageObjects.loginPage import LoginPage
 from pageObjects.signUpPage import SignUpPage
 from pageObjects.homePage import HomePage
 from pageObjects.accountCreatedPage import AccountCreatedPage
+import os
+
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # 2 levels up : tests -> route
@@ -24,7 +26,8 @@ with open(DATA_DIR /'invalid_credentials.json') as f:
 @pytest.mark.parametrize("credentials",user_credentials,ids=lambda x: f"user_{x['userEmail']}")
 @pytest.mark.parametrize("invalid_credentials",invalid_user_credentials,ids=lambda x: f"invalid_{x['userEmail']}")
 def test_user_flow(playwright:Playwright, browser_name, credentials, invalid_credentials):
-    browser = getattr(playwright, browser_name).launch(headless=False)
+    headless_mode = os.getenv("HEADLESS", "true").lower() == "true"
+    browser = getattr(playwright, browser_name).launch(headless=headless_mode)
     page = browser.new_page()
     # Navigate to Create User page
     with allure.step("Navigate to Create User page"):

@@ -15,6 +15,10 @@ jobs:
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
+    env:
+      HEADLESS: "true"
+
+
 
     steps:
       # 1️⃣ Checkout repository
