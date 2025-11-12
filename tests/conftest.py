@@ -36,7 +36,10 @@ def browserInstance(playwright, request):
     browser = getattr(playwright, browser_name).launch(headless=headless, slow_mo=500)
 
     # Create context and start tracing
-    context = browser.new_context()
+    context = browser.new_context(
+        viewport={"width": 1280, "height": 800},
+        ignore_https_errors=True
+    )
     context.tracing.start(screenshots=True, snapshots=True, sources=True)
 
     # Open a new page

@@ -17,7 +17,7 @@ jobs:
         browser: [chromium, firefox, webkit]
 
     env:
-      HEADLESS: "true"
+      HEADLESS: "false"
 
     steps:
       # 1️⃣ Checkout repository
