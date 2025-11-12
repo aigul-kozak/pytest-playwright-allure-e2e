@@ -33,7 +33,7 @@ def browserInstance(playwright, request):
 
     # Launch the browser (headless controlled via env)
     headless = os.getenv("HEADLESS", "true").lower() == "true"
-    browser = getattr(playwright, browser_name).launch(headless=headless)
+    browser = getattr(playwright, browser_name).launch(headless=headless, slow_mo=500)
 
     # Create context and start tracing
     context = browser.new_context()
