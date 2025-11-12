@@ -39,23 +39,34 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps
 
-      # 4️⃣ Run tests for each browser with Allure labels
+      # 4️⃣ Run tests for each browser
       - name: Run tests for ${{ matrix.browser }}
         run: |
           source venv/bin/activate
           export HEADLESS=true
           export BROWSER=${{ matrix.browser }}
-          mkdir -p allure-results
-          pytest --browser=${{ matrix.browser }} --alluredir=allure-results --allure-label "browser:${{ matrix.browser }}"
+          mkdir -p allure-results/${{ matrix.browser }}
+          pytest --browser_name=${{ matrix.browser }} --alluredir=allure-results/${{ matrix.browser }}
 
-      # 5️⃣ Generate Allure report
+      # 5️⃣ Merge Allure results (объединяем все браузеры)
+      - name: Merge Allure results
+        if: ${{ matrix.browser == 'webkit' }}  # только после последнего прогона
+        run: |
+          mkdir -p merged-results
+          for browser_dir in allure-results/*; do
+            cp -r $browser_dir/* merged-results/ || true
+          done
+
+      # 6️⃣ Generate Allure report
       - name: Generate Allure report
+        if: ${{ matrix.browser == 'webkit' }}  # генерируем один общий отчет
         run: |
           npm install -g allure-commandline --save-dev
-          allure generate allure-results -o allure-report --clean
+          allure generate merged-results -o allure-report --clean
 
-      # 6️⃣ Deploy Allure report to GitHub Pages
+      # 7️⃣ Deploy Allure report to GitHub Pages
       - name: Deploy Allure report to GitHub Pages
+        if: ${{ matrix.browser == 'webkit' }}  # деплоим только один отчет
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_PAT }}

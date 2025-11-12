@@ -1,10 +1,6 @@
 import pytest
 import os
 import allure
-import base64
-from allure_commons.types import AttachmentType as BaseAttachmentType
-from enum import Enum
-
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -35,10 +31,7 @@ def browserInstance(playwright, request):
     browser_name = request.config.getoption("browser_name")
     url_name = request.config.getoption("url_name")
 
-    # Reflect browser in Allure report
-    allure.dynamic.parameter("browser", browser_name)
-
-    # Launch the browser
+    # Launch the browser (headless controlled via env)
     headless = os.getenv("HEADLESS", "true").lower() == "true"
     browser = getattr(playwright, browser_name).launch(headless=headless)
 
@@ -48,7 +41,9 @@ def browserInstance(playwright, request):
 
     # Open a new page
     page = context.new_page()
-    # page.goto(url_name)  # Uncomment to navigate immediately
+
+    # Navigate to URL (optional)
+    page.goto(url_name)
 
     yield page
 
@@ -61,11 +56,10 @@ def browserInstance(playwright, request):
 
     # Attach tracing file to Allure report
     with open(trace_path, "rb") as trace_file:
-        data = trace_file.read()
         allure.attach(
-            data,
+            trace_file.read(),
             name=f"trace-{browser_name}",
-            attachment_type="application/zip"  # строкой вместо Enum
+            attachment_type=allure.attachment_type.ZIP
         )
 
     # Close context and browser
