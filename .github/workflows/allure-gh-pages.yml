@@ -28,8 +28,9 @@ jobs:
           playwright install
 
       # 4️⃣ Run tests with Allure results
-      - name: Run tests
+      - name: Run tests with Allure results
         run: |
+          export HEADLESS=true
           source venv/bin/activate
           pytest --alluredir=allure-results
 

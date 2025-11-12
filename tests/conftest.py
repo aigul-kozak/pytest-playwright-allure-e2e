@@ -39,7 +39,8 @@ def browserInstance(playwright, request):
     allure.dynamic.parameter("browser", browser_name)
 
     # Launch the browser
-    browser = getattr(playwright, browser_name).launch(headless=False)
+    headless = os.getenv("HEADLESS", "true").lower() == "true"
+    browser = getattr(playwright, browser_name).launch(headless=headless)
 
     # Create context and start tracing
     context = browser.new_context()
