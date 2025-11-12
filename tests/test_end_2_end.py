@@ -23,16 +23,18 @@ with open(DATA_DIR /'invalid_credentials.json') as f:
 
 @pytest.mark.parametrize("credentials",user_credentials,ids=lambda x: f"user_{x['userEmail']}")
 @pytest.mark.parametrize("invalid_credentials",invalid_user_credentials,ids=lambda x: f"invalid_{x['userEmail']}")
-def test_user_flow(playwright:Playwright, browserInstance, credentials, invalid_credentials):
+def test_user_flow(playwright:Playwright, browser_name, credentials, invalid_credentials):
+    browser = getattr(playwright, browser_name).launch(headless=False)
+    page = browser.new_page()
     # Navigate to Create User page
     with allure.step("Navigate to Create User page"):
-        createUserPage = CreateUser(browserInstance)
+        createUserPage = CreateUser(page)
         createUserPage.navigate()
     # Sign up user
     with allure.step(f"Sign up user: {credentials}"):
         loginPage = createUserPage.signup()
         loginPage.name(credentials)
-        signUpPage = SignUpPage(browserInstance)
+        signUpPage = SignUpPage(page)
         click_continue = signUpPage.fill_signup_form(credentials)
         homePage = click_continue.click_continue()
     # Logout user
@@ -58,6 +60,8 @@ def test_user_flow(playwright:Playwright, browserInstance, credentials, invalid_
         allure.attach(deletedPage.page.screenshot(), name="account_deleted", attachment_type=allure.attachment_type.PNG)
         expect(deletedPage.page.locator("text=Account Deleted!")).to_be_visible()
         deletedPage.continue_after_del()
+
+        browser.close()
 
 
 
