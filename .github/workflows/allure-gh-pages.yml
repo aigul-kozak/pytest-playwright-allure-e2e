@@ -9,23 +9,28 @@ on:
       - main
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         browser: [chromium, firefox, webkit]
+
     env:
       HEADLESS: "false"
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Set up Python
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
 
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: |
           python -m venv venv
@@ -34,51 +39,39 @@ jobs:
           pip install -r requirements.txt
           playwright install --with-deps
 
+      # 3.1️⃣ Clean old Allure results
+      - name: Clean old Allure results
+        run: |
+          rm -rf allure-results merged-results allure-report || true
+
+      # 4️⃣ Run tests for each browser
       - name: Run tests for ${{ matrix.browser }}
         run: |
           source venv/bin/activate
           export HEADLESS=true
+          export BROWSER=${{ matrix.browser }}
+          mkdir -p allure-results/${{ matrix.browser }}
           pytest --browser_name=${{ matrix.browser }} --alluredir=allure-results/${{ matrix.browser }}
 
-      - name: Upload Allure results
-        uses: actions/upload-artifact@v4
-        with:
-          name: allure-results-${{ matrix.browser }}
-          path: allure-results/${{ matrix.browser }}
-
-  allure-report:
-    runs-on: ubuntu-latest
-    needs: test  # ждём завершения всех job по браузерам
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Download Allure results artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: allure-results-chromium
-          path: allure-results/chromium
-      - uses: actions/download-artifact@v4
-        with:
-          name: allure-results-firefox
-          path: allure-results/firefox
-      - uses: actions/download-artifact@v4
-        with:
-          name: allure-results-webkit
-          path: allure-results/webkit
-
+      # 5️⃣ Merge Allure results (объединяем все браузеры)
       - name: Merge Allure results
+        if: ${{ matrix.browser == 'webkit' }}
         run: |
           mkdir -p merged-results
-          cp -r allure-results/*/* merged-results/ || true
+          for browser_dir in allure-results/*; do
+            cp -r $browser_dir/* merged-results/ || true
+          done
 
+      # 6️⃣ Generate Allure report
       - name: Generate Allure report
+        if: ${{ matrix.browser == 'webkit' }}
         run: |
           npm install -g allure-commandline --save-dev
           allure generate merged-results -o allure-report --clean
 
+      # 7️⃣ Deploy Allure report to GitHub Pages
       - name: Deploy Allure report to GitHub Pages
+        if: ${{ matrix.browser == 'webkit' }}
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GH_PAT }}
