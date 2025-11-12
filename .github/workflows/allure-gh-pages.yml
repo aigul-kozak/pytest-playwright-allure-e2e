@@ -29,7 +29,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install -r requirements.txt
-          playwright install
+          playwright install --with-deps
 
       # 4️⃣ Run tests with Allure results
       - name: Run tests with Allure results
@@ -51,3 +51,5 @@ jobs:
           github_token: ${{ secrets.GH_PAT }}
           publish_dir: ./allure-report
           publish_branch: gh-pages
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
