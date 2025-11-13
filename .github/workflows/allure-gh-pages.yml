@@ -1,4 +1,4 @@
-name: Playwright E2E Tests with Allure Report
+name: Playwright E2E Tests with Allure Report (v2)
 
 on:
   push:
@@ -42,7 +42,7 @@ jobs:
       - name: Upload Allure results for ${{ matrix.browser }}
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ matrix.browser }}
+          name: allure-results-v2-${{ matrix.browser }}
           path: allure-results
 
   report:
@@ -62,11 +62,13 @@ jobs:
         run: |
           mkdir -p allure-results
           cp -r merged-results/*/* allure-results/ || true
+          echo "Allure results merged successfully"
 
       - name: Generate Allure report
         run: |
           npm install -g allure-commandline --save-dev
           allure generate allure-results -o allure-report --clean
+          echo "Allure report generated successfully"
 
       - name: Deploy Allure report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
