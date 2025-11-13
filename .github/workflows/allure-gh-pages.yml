@@ -36,6 +36,7 @@ jobs:
         run: |
           source venv/bin/activate
           export HEADLESS=true
+          export BROWSER=${{ matrix.browser }}   # <- важно для Allure
           mkdir -p allure-results
           pytest --browser_name=${{ matrix.browser }} --alluredir=allure-results
 
@@ -47,7 +48,7 @@ jobs:
 
   report:
     runs-on: ubuntu-latest
-    needs: test
+    needs: test  # ждём завершения всех браузеров
 
     steps:
       - name: Checkout repository
@@ -56,22 +57,22 @@ jobs:
       - name: Download all Allure results
         uses: actions/download-artifact@v4
         with:
-          path: allure-results
+          path: merged-results
 
       - name: Merge Allure results
         run: |
-          mkdir -p merged-results
-          for dir in allure-results/*; do
+          mkdir -p allure-results
+          for dir in merged-results/*; do
             echo "Merging $dir"
-            cp -r "$dir"/* merged-results/ || true
+            cp -r "$dir"/* allure-results/ || true
           done
           echo "Merged results:"
-          ls -R merged-results
+          ls -R allure-results
 
       - name: Generate Allure report
         run: |
           npm install -g allure-commandline --save-dev
-          allure generate merged-results -o allure-report --clean
+          allure generate allure-results -o allure-report --clean
 
       - name: Deploy Allure report to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
