@@ -68,3 +68,18 @@ def browserInstance(playwright, request):
     # Close context and browser
     context.close()
     browser.close()
+
+
+# --- Add browser metadata for Allure reports ---
+def pytest_configure(config):
+    browser_name = os.getenv("BROWSER", "chromium")
+    config._metadata = getattr(config, "_metadata", {})
+    config._metadata["Browser"] = browser_name
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    result = outcome.get_result()
+    browser_name = os.getenv("BROWSER", "chromium")
+    if hasattr(result, "user_properties"):
+        result.user_properties.append(("browser", browser_name))
