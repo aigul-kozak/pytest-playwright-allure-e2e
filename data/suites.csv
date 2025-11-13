@@ -1,2 +1,2 @@
 "DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","7709","test_user_flow[chromium-invalid_kozakqa1@gmail.com-user_kozakqa@gmail.com]","tests","Thu Nov 13 19:10:31 UTC 2025","passed","Thu Nov 13 19:10:39 UTC 2025","","test_end_2_end","",""
+"","6957","test_user_flow[chromium-invalid_kozakqa1@gmail.com-user_kozakqa@gmail.com]","tests","Thu Nov 13 19:24:03 UTC 2025","passed","Thu Nov 13 19:24:10 UTC 2025","","test_end_2_end","",""
